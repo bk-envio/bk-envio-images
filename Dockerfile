@@ -24,6 +24,7 @@ RUN set -ex \
     && echo "deb https://apt.buildkite.com/buildkite-agent stable main" | tee /etc/apt/sources.list.d/buildkite-agent.list \
     && apt-get install software-properties-common -y --no-install-recommends \
     && apt-add-repository -y ppa:git-core/ppa \
+	&& apt-add-repository universe \
     && apt-get update \
     && apt-get install git=1:2.* -y --no-install-recommends \
     && git version \
