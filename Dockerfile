@@ -9,7 +9,7 @@
 # This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-FROM ubuntu:20.04 AS core
+FROM ubuntu:18.04 AS core
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
@@ -24,7 +24,6 @@ RUN set -ex \
     && echo "deb https://apt.buildkite.com/buildkite-agent stable main" | tee /etc/apt/sources.list.d/buildkite-agent.list \
     && apt-get install software-properties-common -y --no-install-recommends \
     && apt-add-repository -y ppa:git-core/ppa \
-	&& apt-add-repository universe \
     && apt-get update \
     && apt-get install git=1:2.* -y --no-install-recommends \
     && git version \
@@ -39,21 +38,41 @@ RUN set -ex \
           bzr curl cvs cvsps dirmngr docbook-xml docbook-xsl dpkg-dev \
           e2fsprogs expect fakeroot file g++ gcc gettext gettext-base \
           git groff gzip imagemagick iptables jq less libapr1 libaprutil1 \
-          libargon2-0-dev libbz2-dev libc6-dev libcurl4-openssl-dev \
+          libargon2-0-dev libbz2-dev libc6-dev libcurl4 libcurl4-openssl-dev \
           libdb-dev libdbd-sqlite3-perl libdbi-perl libdpkg-perl \
           libedit-dev liberror-perl libevent-dev libffi-dev libgeoip-dev \
           libglib2.0-dev libhttp-date-perl libio-pty-perl libjpeg-dev \
           libkrb5-dev liblzma-dev libmagickcore-dev libmagickwand-dev \
           libmysqlclient-dev libncurses5-dev libncursesw5-dev libonig-dev \
-          libpq-dev libreadline-dev libserf-1-1 libsqlite3-dev libssl-dev \
+          libpq-dev libreadline-dev libserf-1-1 sqlite3 libsqlite3-dev libssl-dev \
           libsvn1 libsvn-perl libtcl8.6 libtidy-dev libtimedate-perl \
-          libtool libwebp-dev libxml2-dev libxml2-utils libxslt1-dev \
+          libtool libwebp-dev libxml2-dev libxml2-utils libxslt-dev libxslt1-dev \
           libyaml-dev libyaml-perl llvm locales make mercurial mlocate mono-devel \
           netbase openssl patch pkg-config procps python-bzrlib \
           python-configobj python-openssl rsync sgml-base sgml-data subversion \
           tar tcl tcl8.6 tk tk-dev unzip wget xfsprogs xml-core xmlto xsltproc \
-          libzip4 libzip-dev vim xvfb xz-utils zip zlib1g-dev buildkite-agent \
-    && rm -rf /var/lib/apt/lists/* 
+          libzip4 libzip-dev vim xvfb xz-utils zip zlib1g zlib1g-dev buildkite-agent
+
+
+# Install postgresql tools & clean lists
+RUN curl -sL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
+        apt-transport-https \
+        libmagic-dev \
+        libgit2-dev \
+        libmaxminddb-dev \
+        pngquant \
+        postgresql-server-dev-12 \
+        postgresql-client-12 \
+        libtiff5 libtiffxx5 \
+        ffmpeg libpng-dev librsvg2-dev libjpeg-dev libwebp-dev \
+        libgif-dev libtiff-dev libexif-dev \
+        libvips-dev \
+        libreadline6-dev \
+        ncurses-dev bison \
+    && rm -rf /var/lib/apt/lists/*
+
 
 RUN useradd codebuild-user
 
@@ -178,7 +197,7 @@ FROM tools AS runtimes
 
 #****************     .NET-CORE     *******************************************************
 
-ENV DOTNET_31_SDK_VERSION="3.1.3"
+ENV DOTNET_31_SDK_VERSION="3.1.103"
 ENV DOTNET_ROOT="/root/.dotnet"
 
 # Add .NET Core Global Tools install folder to PATH
@@ -292,7 +311,8 @@ ENV GOLANG_13_VERSION="1.13.10" \
     GOLANG_12_VERSION="1.12.17"
 
 RUN goenv install $GOLANG_12_VERSION; rm -rf /tmp/*
-RUN goenv install $GOLANG_13_VERSION; rm -rf /tmp/*
+RUN goenv install $GOLANG_13_VERSION; rm -rf /tmp/*; \
+    goenv global  $GOLANG_13_VERSION
 
 RUN go get -u github.com/golang/dep/cmd/dep
 #****************      END GOLANG     *******************************
