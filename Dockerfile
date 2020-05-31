@@ -9,7 +9,7 @@
 # This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-FROM ubuntu:18.04 AS core
+FROM ubuntu:20.04 AS core
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
@@ -19,7 +19,9 @@ RUN set -ex \
     && apt-get update \
     && apt install -y apt-transport-https gnupg ca-certificates \
     && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 32A37959C2FA5C3C99EFBC32A79206696452D198 \
     && echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | tee /etc/apt/sources.list.d/mono-official-stable.list \
+    && echo "deb https://apt.buildkite.com/buildkite-agent stable main" | sudo tee /etc/apt/sources.list.d/buildkite-agent.list \
     && apt-get install software-properties-common -y --no-install-recommends \
     && apt-add-repository -y ppa:git-core/ppa \
     && apt-get update \
@@ -49,7 +51,7 @@ RUN set -ex \
           netbase openssl patch pkg-config procps python-bzrlib \
           python-configobj python-openssl rsync sgml-base sgml-data subversion \
           tar tcl tcl8.6 tk tk-dev unzip wget xfsprogs xml-core xmlto xsltproc \
-          libzip4 libzip-dev vim xvfb xz-utils zip zlib1g-dev \
+          libzip4 libzip-dev vim xvfb xz-utils zip zlib1g-dev buildkite-agent \
     && rm -rf /var/lib/apt/lists/* 
 
 RUN useradd codebuild-user
@@ -175,7 +177,7 @@ FROM tools AS runtimes
 
 #****************     .NET-CORE     *******************************************************
 
-ENV DOTNET_31_SDK_VERSION="3.1.103"
+ENV DOTNET_31_SDK_VERSION="3.1.3"
 ENV DOTNET_ROOT="/root/.dotnet"
 
 # Add .NET Core Global Tools install folder to PATH
@@ -217,10 +219,10 @@ RUN set -ex \
 
 #****************      NODEJS     ****************************************************
 
-ENV NODE_12_VERSION="12.16.3" \
-    NODE_10_VERSION="10.20.1"
+ENV NODE_12_VERSION="12.17.0" \
+    NODE_14_VERSION="14.3.0"
 
-RUN     n $NODE_10_VERSION && npm install --save-dev -g -f grunt && npm install --save-dev -g -f grunt-cli && npm install --save-dev -g -f webpack \
+RUN     n $NODE_14_VERSION && npm install --save-dev -g -f grunt && npm install --save-dev -g -f grunt-cli && npm install --save-dev -g -f webpack \
      && n $NODE_12_VERSION && npm install --save-dev -g -f grunt && npm install --save-dev -g -f grunt-cli && npm install --save-dev -g -f webpack \
      && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
      && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
@@ -235,8 +237,8 @@ RUN     n $NODE_10_VERSION && npm install --save-dev -g -f grunt && npm install 
 ENV RUBY_26_VERSION="2.6.6" \
     RUBY_27_VERSION="2.7.1"
 
-RUN rbenv install $RUBY_26_VERSION; rm -rf /tmp/*
-RUN rbenv install $RUBY_27_VERSION; rm -rf /tmp/*; rbenv global $RUBY_27_VERSION;ruby -v
+RUN rbenv install $RUBY_27_VERSION; rm -rf /tmp/*
+RUN rbenv install $RUBY_26_VERSION; rm -rf /tmp/*; rbenv global $RUBY_26_VERSION;ruby -v
 
 #**************** END RUBY *****************************************************
 
@@ -289,9 +291,7 @@ ENV GOLANG_13_VERSION="1.13.10" \
     GOLANG_12_VERSION="1.12.17"
 
 RUN goenv install $GOLANG_12_VERSION; rm -rf /tmp/*
-
-RUN goenv install $GOLANG_13_VERSION; rm -rf /tmp/*; \
-    goenv global  $GOLANG_13_VERSION
+RUN goenv install $GOLANG_13_VERSION; rm -rf /tmp/*
 
 RUN go get -u github.com/golang/dep/cmd/dep
 #****************      END GOLANG     *******************************
@@ -431,41 +431,41 @@ RUN set -ex \
 #****************     END JAVA     ****************************************************
 
 #****************        DOCKER    *********************************************
-ENV DOCKER_BUCKET="download.docker.com" \
-    DOCKER_CHANNEL="stable" \
-    DIND_COMMIT="3b5fac462d21ca164b3778647420016315289034" \
-    DOCKER_COMPOSE_VERSION="1.25.5" \
-    SRC_DIR="/usr/src"
+# ENV DOCKER_BUCKET="download.docker.com" \
+#     DOCKER_CHANNEL="stable" \
+#     DIND_COMMIT="3b5fac462d21ca164b3778647420016315289034" \
+#     DOCKER_COMPOSE_VERSION="1.25.5" \
+#     SRC_DIR="/usr/src"
 
-ENV DOCKER_SHA256="7f4115dc6a3c19c917f8b9664d7b51c904def1c984e082c4600097433323cf6f"
-ENV DOCKER_VERSION="19.03.8"
+# ENV DOCKER_SHA256="7f4115dc6a3c19c917f8b9664d7b51c904def1c984e082c4600097433323cf6f"
+# ENV DOCKER_VERSION="19.03.8"
 
-# Install Docker
-RUN set -ex \
-    && curl -fSL "https://${DOCKER_BUCKET}/linux/static/${DOCKER_CHANNEL}/x86_64/docker-${DOCKER_VERSION}.tgz" -o docker.tgz \
-    && echo "${DOCKER_SHA256} *docker.tgz" | sha256sum -c - \
-    && tar --extract --file docker.tgz --strip-components 1  --directory /usr/local/bin/ \
-    && rm docker.tgz \
-    && docker -v \
-# set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
-    && addgroup dockremap \
-    && useradd -g dockremap dockremap \
-    && echo 'dockremap:165536:65536' >> /etc/subuid \
-    && echo 'dockremap:165536:65536' >> /etc/subgid \
-    && wget -nv "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind" -O /usr/local/bin/dind \
-    && curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-Linux-x86_64 > /usr/local/bin/docker-compose \
-    && chmod +x /usr/local/bin/dind /usr/local/bin/docker-compose \
-# Ensure docker-compose works
-    && docker-compose version
+# # Install Docker
+# RUN set -ex \
+#     && curl -fSL "https://${DOCKER_BUCKET}/linux/static/${DOCKER_CHANNEL}/x86_64/docker-${DOCKER_VERSION}.tgz" -o docker.tgz \
+#     && echo "${DOCKER_SHA256} *docker.tgz" | sha256sum -c - \
+#     && tar --extract --file docker.tgz --strip-components 1  --directory /usr/local/bin/ \
+#     && rm docker.tgz \
+#     && docker -v \
+# # set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
+#     && addgroup dockremap \
+#     && useradd -g dockremap dockremap \
+#     && echo 'dockremap:165536:65536' >> /etc/subuid \
+#     && echo 'dockremap:165536:65536' >> /etc/subgid \
+#     && wget -nv "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind" -O /usr/local/bin/dind \
+#     && curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-Linux-x86_64 > /usr/local/bin/docker-compose \
+#     && chmod +x /usr/local/bin/dind /usr/local/bin/docker-compose \
+# # Ensure docker-compose works
+#     && docker-compose version
 
-VOLUME /var/lib/docker
+# VOLUME /var/lib/docker
 #*********************** END  DOCKER  ****************************
 
 #=======================End of layer: corretto  =================
 FROM runtimes_n_corretto AS std_v4
 
 # GoLang 14
-ENV GOLANG_14_VERSION="1.14.2"
+ENV GOLANG_14_VERSION="1.14.3"
 RUN goenv install $GOLANG_14_VERSION; rm -rf /tmp/*; \
     goenv global  $GOLANG_14_VERSION
 
