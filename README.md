@@ -98,6 +98,28 @@ Also all required libs and tools installed below but not limited to:
 
 
 
+## Wait (_for anythnig to be healthy_)
+
+```
+...
+  app:
+    image: 'bkenvio/ubuntu:latest'
+    working_dir: /app
+    volumes:
+      - $PWD:/app
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    environment:
+      REDIS_URL: redis://redis
+      PGHOST: db
+      #  This is where you define wait for host:port
+      WAIT_HOSTS: db:5432 #, mysql:3306, mongo:27017
+```
+
+`WAIT_HOSTS` determines what to wait for.
+
 Please note that, Docker (inline) has been removed. You can always attach your host's docker using compose or volume.
 
 
