@@ -98,7 +98,7 @@ Also all required libs and tools installed below but not limited to:
 
 
 
-## Wait (_for anythnig to be healthy_)
+## Wait (_for anything to be healthy_)
 
 ```
 ...
