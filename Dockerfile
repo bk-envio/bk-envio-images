@@ -449,6 +449,14 @@ RUN set -ex \
     # Cleanup
     && rm -fr /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && apt-get clean
+	
+# Download Flutter SDK
+
+ENV FLUTTER_HOME="/usr/local/flutter"
+RUN set -ex \
+    && git clone https://github.com/flutter/flutter.git -b stable $FLUTTER_HOME
+ENV PATH "$PATH:$FLUTTER_HOME/bin"
+
 #****************     END JAVA     ****************************************************
 
 #****************        DOCKER    *********************************************
