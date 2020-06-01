@@ -10,7 +10,7 @@ This project contains pre-built Docker Images for Buildkite to perform build tas
 
 
 
-Assume you have `docker-compose.yml` in `.buildkite/`
+Assuming you have `docker-compose.yml` in `.buildkite/`
 
 ```
 version: '3.8'
