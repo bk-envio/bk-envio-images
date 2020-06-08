@@ -498,14 +498,16 @@ ENV GOLANG_14_VERSION="1.14.3"
 RUN goenv install $GOLANG_14_VERSION; rm -rf /tmp/*; \
     goenv global  $GOLANG_14_VERSION
 
+# Install CLI apps
+RUN n $NODE_14_VERSION && npm i -g postmark-cli twilio-cli
+RUN n $NODE_12_VERSION && npm i -g postmark-cli twilio-cli
+
 # Activate runtime versions specific to image version.
 RUN n $NODE_12_VERSION
 RUN pyenv  global $PYTHON_38_VERSION
 RUN phpenv global $PHP_74_VERSION
 RUN rbenv  global $RUBY_27_VERSION
 
-# Install CLI apps
-RUN npm i -g postmark-cli twilio-cli
 
 # Configure SSH
 COPY ssh_config /root/.ssh/config
