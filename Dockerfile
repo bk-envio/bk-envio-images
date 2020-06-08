@@ -514,7 +514,6 @@ COPY amazon-ssm-agent.json          /etc/amazon/ssm/
 
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /usr/local/bin/wait
 RUN chmod +x /usr/local/bin/wait
-CMD /usr/local/bin/wait && dockerd-entrypoint.sh
 
 ENTRYPOINT ["dockerd-entrypoint.sh"]
 

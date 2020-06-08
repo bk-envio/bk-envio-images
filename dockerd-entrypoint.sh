@@ -20,4 +20,6 @@ set -e
 # 	sleep 1
 # done
 
+/usr/local/bin/wait && echo "~~~ Waited for daemons..."
+
 eval "$@"
