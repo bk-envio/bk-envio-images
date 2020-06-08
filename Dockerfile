@@ -504,6 +504,9 @@ RUN pyenv  global $PYTHON_38_VERSION
 RUN phpenv global $PHP_74_VERSION
 RUN rbenv  global $RUBY_27_VERSION
 
+# Install CLI apps
+RUN npm i -g postmark-cli twilio-cli
+
 # Configure SSH
 COPY ssh_config /root/.ssh/config
 COPY runtimes.yml /codebuild/image/config/runtimes.yml
