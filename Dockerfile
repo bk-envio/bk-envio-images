@@ -71,6 +71,7 @@ RUN curl -sL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - 
         libvips-dev \
         libreadline6-dev \
         ncurses-dev bison \
+		cmake \
     && rm -rf /var/lib/apt/lists/*
 
 
