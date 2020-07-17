@@ -495,7 +495,7 @@ ENV PATH "$PATH:$FLUTTER_HOME/bin"
 FROM runtimes_n_corretto AS std_v4
 
 # GoLang 14
-ENV GOLANG_14_VERSION="1.14.3"
+ENV GOLANG_14_VERSION="1.14.5"
 RUN goenv install $GOLANG_14_VERSION; rm -rf /tmp/*; \
     goenv global  $GOLANG_14_VERSION
 
