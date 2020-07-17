@@ -240,8 +240,8 @@ RUN set -ex \
 
 #****************      NODEJS     ****************************************************
 
-ENV NODE_12_VERSION="12.17.0" \
-    NODE_14_VERSION="14.3.0"
+ENV NODE_12_VERSION="12.18.2" \
+    NODE_14_VERSION="14.5.0"
 
 RUN     n $NODE_14_VERSION && npm install --save-dev -g -f grunt && npm install --save-dev -g -f grunt-cli && npm install --save-dev -g -f webpack \
      && n $NODE_12_VERSION && npm install --save-dev -g -f grunt && npm install --save-dev -g -f grunt-cli && npm install --save-dev -g -f webpack \
