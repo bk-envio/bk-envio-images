@@ -500,8 +500,8 @@ RUN goenv install $GOLANG_14_VERSION; rm -rf /tmp/*; \
     goenv global  $GOLANG_14_VERSION
 
 # Install CLI apps
-RUN n $NODE_14_VERSION && npm i -g postmark-cli twilio-cli
-RUN n $NODE_12_VERSION && npm i -g postmark-cli twilio-cli
+RUN n $NODE_14_VERSION && npm i -g postmark-cli twilio-cli nexmo-cli
+RUN n $NODE_12_VERSION && npm i -g postmark-cli twilio-cli nexmo-cli
 
 # Activate runtime versions specific to image version.
 RUN n $NODE_12_VERSION
