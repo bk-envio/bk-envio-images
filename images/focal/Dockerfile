@@ -37,7 +37,7 @@ RUN set -ex \
     && chmod 600 ~/.ssh/known_hosts \
     && apt-get install -y --no-install-recommends \
           build-essential unzip wget \
-          libzip5 libzip-dev vim xvfb xz-utils zip zlib1g zlib1g-dev buildkite-agent \
+          libzip5 libzip-dev jq xvfb xz-utils zip zlib1g zlib1g-dev buildkite-agent \
           libmagic-dev \
           libgit2-dev \
           libmaxminddb-dev \
