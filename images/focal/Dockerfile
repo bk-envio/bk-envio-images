@@ -38,6 +38,9 @@ RUN set -ex \
     && apt-get install -y --no-install-recommends \
           build-essential unzip wget \
           libzip5 libzip-dev jq xvfb xz-utils zip zlib1g zlib1g-dev buildkite-agent \
+		  git curl autoconf bison build-essential \
+          libssl-dev libyaml-dev libreadline6-dev zlib1g-dev \
+          libncurses5-dev libffi-dev libgdbm6 libgdbm-dev libdb-dev \
           libmagic-dev \
           libgit2-dev \
           libmaxminddb-dev \
