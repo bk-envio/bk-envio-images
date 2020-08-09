@@ -36,23 +36,7 @@ RUN set -ex \
     && ssh-keyscan -t rsa,dsa -H bitbucket.org >> ~/.ssh/known_hosts \
     && chmod 600 ~/.ssh/known_hosts \
     && apt-get install -y --no-install-recommends \
-          apt-utils asciidoc autoconf automake build-essential bzip2 \
-          bzr curl cvs cvsps dirmngr docbook-xml docbook-xsl dpkg-dev \
-          e2fsprogs expect fakeroot file g++ gcc gettext gettext-base \
-          git groff gzip imagemagick iptables jq less libapr1 libaprutil1 \
-          libargon2-0-dev libbz2-dev libc6-dev libcurl4 libcurl4-openssl-dev \
-          libdb-dev libdbd-sqlite3-perl libdbi-perl libdpkg-perl \
-          libedit-dev liberror-perl libevent-dev libffi-dev libgeoip-dev \
-          libglib2.0-dev libhttp-date-perl libio-pty-perl libjpeg-dev \
-          libkrb5-dev liblzma-dev libmagickcore-dev libmagickwand-dev \
-          libncurses5-dev libncursesw5-dev libonig-dev \
-          libpq-dev libreadline-dev libserf-1-1 sqlite3 libsqlite3-dev libssl-dev \
-          libsvn1 libsvn-perl libtcl8.6 libtidy-dev libtimedate-perl \
-          libtool libwebp-dev libxml2-dev libxml2-utils libxslt-dev libxslt1-dev \
-          libyaml-dev libyaml-perl llvm locales make mercurial mlocate mono-devel \
-          netbase openssl patch pkg-config procps \
-          python-openssl rsync sgml-base sgml-data subversion \
-          tar tcl tcl8.6 tk tk-dev unzip wget xfsprogs xml-core xmlto xsltproc \
+          build-essential unzip wget \
           libzip5 libzip-dev vim xvfb xz-utils zip zlib1g zlib1g-dev buildkite-agent \
           libmagic-dev \
           libgit2-dev \
@@ -64,6 +48,7 @@ RUN set -ex \
           ffmpeg libpng-dev librsvg2-dev libjpeg-dev libwebp-dev \
           libgif-dev libtiff-dev libexif-dev \
           libvips-dev \
+		  libpq-dev \
           libreadline6-dev \
           ncurses-dev bison \
           cmake \
@@ -76,16 +61,6 @@ RUN useradd codebuild-user
 
 
 FROM core AS tools
-
-# Install Firefox
-RUN set -ex \
-    && apt-add-repository -y "deb http://archive.canonical.com/ubuntu $(lsb_release -sc) partner" \
-    && apt-get install -y libgtk-3-0 libglib2.0-0 libdbus-glib-1-2 libdbus-1-3 libasound2 \
-    && wget -nv -O ~/FirefoxSetup.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64" \
-    && tar xjf ~/FirefoxSetup.tar.bz2 -C /opt/ \
-    && ln -s /opt/firefox/firefox /usr/local/bin/firefox \
-    && rm ~/FirefoxSetup.tar.bz2 \
-    && firefox --version
 
 # Install GeckoDriver
 RUN set -ex \
@@ -188,49 +163,8 @@ ENV GOENV_DISABLE_GOPATH=1
 ENV GOPATH="/go"
 
 #=======================End of layer: tools  =================
+
 FROM tools AS runtimes
-
-#****************     .NET-CORE     *******************************************************
-
-ENV DOTNET_31_SDK_VERSION="3.1.103"
-ENV DOTNET_ROOT="/root/.dotnet"
-
-# Add .NET Core Global Tools install folder to PATH
-RUN  /usr/local/bin/dotnet-install.sh -v $DOTNET_31_SDK_VERSION \
-     && dotnet --list-sdks \
-     && rm -rf /tmp/*
-
-# Trigger the population of the local package cache
-ENV NUGET_XMLDOC_MODE skip
-RUN set -ex \
-    && mkdir warmup \
-    && cd warmup \
-    && dotnet new \
-    && cd .. \
-    && rm -rf warmup \
-    && rm -rf /tmp/NuGetScratch
-
-# Install GitVersion
-ENV GITVERSION_VERSION="5.2.4"
-RUN set -ex \
-    && dotnet tool install --global GitVersion.Tool --version $GITVERSION_VERSION \
-    && ln -s ~/.dotnet/tools/dotnet-gitversion /usr/local/bin/gitversion
-
-# Install Powershell Core
-# See instructions at https://docs.microsoft.com/en-us/powershell/scripting/setup/installing-powershell-core-on-linux
-ENV POWERSHELL_VERSION 6.2.4
-ENV POWERSHELL_DOWNLOAD_URL https://github.com/PowerShell/PowerShell/releases/download/v$POWERSHELL_VERSION/powershell-$POWERSHELL_VERSION-linux-x64.tar.gz
-ENV POWERSHELL_DOWNLOAD_SHA be349b9a2244ac06bc6a6e694434cae13af696ea42eb47e8ad1ad39354a2d039
-
-RUN set -ex \
-    && curl -SL $POWERSHELL_DOWNLOAD_URL --output powershell.tar.gz \
-    && echo "$POWERSHELL_DOWNLOAD_SHA powershell.tar.gz" | sha256sum -c - \
-    && mkdir -p /opt/microsoft/powershell/$POWERSHELL_VERSION \
-    && tar zxf powershell.tar.gz -C /opt/microsoft/powershell/$POWERSHELL_VERSION \
-    && rm powershell.tar.gz \
-    && ln -s /opt/microsoft/powershell/$POWERSHELL_VERSION/pwsh /usr/bin/pwsh
-#****************     END .NET-CORE     *******************************************************
-
 
 #****************      NODEJS     ****************************************************
 
