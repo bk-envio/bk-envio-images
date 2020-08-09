@@ -260,7 +260,7 @@ ENV PYTHON_38_VERSION="3.8.2"
 
 ENV PYTHON_PIP_VERSION=19.3.1
 
-COPY ../../tools/runtime_configs/python/$PYTHON_38_VERSION /root/.pyenv/plugins/python-build/share/python-build/$PYTHON_38_VERSION
+COPY tools/runtime_configs/python/$PYTHON_38_VERSION /root/.pyenv/plugins/python-build/share/python-build/$PYTHON_38_VERSION
 RUN   env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install $PYTHON_38_VERSION; rm -rf /tmp/*
 RUN   pyenv global  $PYTHON_38_VERSION
 RUN set -ex \
@@ -294,12 +294,12 @@ RUN rbenv  local $RUBY_27_VERSION
 
 
 # Configure SSH
-COPY ../../ssh_config /root/.ssh/config
-COPY ../../runtimes.yml /codebuild/image/config/runtimes.yml
-COPY ../../dockerd-entrypoint.sh /usr/local/bin/
-COPY ../../legal/THIRD_PARTY_LICENSES.txt /usr/share/doc
-COPY ../../legal/bill_of_material.txt     /usr/share/doc
-COPY ../../amazon-ssm-agent.json          /etc/amazon/ssm/
+COPY ssh_config /root/.ssh/config
+COPY runtimes.yml /codebuild/image/config/runtimes.yml
+COPY dockerd-entrypoint.sh /usr/local/bin/
+COPY legal/THIRD_PARTY_LICENSES.txt /usr/share/doc
+COPY legal/bill_of_material.txt     /usr/share/doc
+COPY amazon-ssm-agent.json          /etc/amazon/ssm/
 
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /usr/local/bin/wait
 RUN chmod +x /usr/local/bin/wait
