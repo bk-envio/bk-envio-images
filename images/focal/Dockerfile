@@ -211,11 +211,11 @@ RUN set -ex \
 
 FROM runtimes AS std_v4
 
-# GoLang 14
-ENV GOLANG_14_VERSION="1.14.5"
-RUN goenv install $GOLANG_14_VERSION; rm -rf /tmp/*; \
-    goenv global  $GOLANG_14_VERSION; \
-    goenv local  $GOLANG_14_VERSION
+# GoLang 15
+ENV GOLANG_15_VERSION="1.15.0"
+RUN goenv install $GOLANG_15_VERSION; rm -rf /tmp/*; \
+    goenv global  $GOLANG_15_VERSION; \
+    goenv local  $GOLANG_15_VERSION
 
 # Install CLI apps
 RUN n $NODE_14_VERSION && npm i -g postmark-cli twilio-cli nexmo-cli
