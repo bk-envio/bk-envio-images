@@ -171,8 +171,8 @@ FROM tools AS runtimes
 
 #****************      NODEJS     ****************************************************
 
-ENV NODE_12_VERSION="12.18.2" \
-    NODE_14_VERSION="14.5.0"
+ENV NODE_12_VERSION="12.18.3" \
+    NODE_14_VERSION="14.9.0"
 
 RUN     n $NODE_14_VERSION && npm install --save-dev -g -f grunt && npm install --save-dev -g -f grunt-cli && npm install --save-dev -g -f webpack \
      && n $NODE_12_VERSION && npm install --save-dev -g -f grunt && npm install --save-dev -g -f grunt-cli && npm install --save-dev -g -f webpack \
@@ -193,7 +193,7 @@ RUN rbenv install $RUBY_27_VERSION; rm -rf /tmp/*; rbenv global $RUBY_27_VERSION
 #**************** END RUBY *****************************************************
 
 #**************** PYTHON *****************************************************
-ENV PYTHON_38_VERSION="3.8.2"
+ENV PYTHON_38_VERSION="3.8.5"
 
 ENV PYTHON_PIP_VERSION=19.3.1
 
